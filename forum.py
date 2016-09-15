@@ -17,8 +17,9 @@
 ##
 
 # Extent, navigation
+# - - - - - - - - - -
 # structure of internal page link URL:
-# "viewtopic.php?" + param list
+# "...viewtopic.php?" + param list
 # t=[1259] -> topic number
 # postdays=[0] -> default 0 for every link. change this and it breaks
 # postorder=[asc] -> ascending/descending (dsc)
@@ -29,6 +30,45 @@
 # method 2 = count # of posts, and use URL' start' param
 	# if return does not equal increment amount(15), we're done
 	# go one more and check for "No posts exist for this topic" text. if yes, great. if not, exit with error
+
+
+# Finding posts
+# - - - - - - - - - -
+# DOM Node structure of post - pertinent details only
+<tr>
+	<td...><span class="name"><a name={"#####"}></a><b>{"nameString"}</b></span>...</td> 
+	<td...>
+		<table...>
+			<tr>
+				<td...><a href="viewtopic.php?p={#####}#{#####}">...<span class="postdetails">"Posted: {DateString}"<span...></span></span></td>
+				<td...><a href="posting.php?{mode=quote}&p={#####}">...</td>
+			</tr>
+			<tr>
+				<td...>
+			</tr>
+			<tr>
+				<td...><span class="postbody">{textString}...</span><span class="gensmall"></span></td>
+			</tr>
+		</table>
+	</td>
+</tr>
+
+# validate if true for one page
+# validate if true for all posts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
