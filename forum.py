@@ -35,25 +35,60 @@
 # Finding posts
 # - - - - - - - - - -
 # DOM Node structure of post - pertinent details only
-<tr>
-	<td...><span class="name"><a name={"#####"}></a><b>{"nameString"}</b></span>...</td> 
-	<td...>
-		<table...>
-			<tr>
-				<td...><a href="viewtopic.php?p={#####}#{#####}">...<span class="postdetails">"Posted: {DateString}"<span...></span></span></td>
-				<td...><a href="posting.php?{mode=quote}&p={#####}">...</td>
-			</tr>
-			<tr>
-				<td...>
-			</tr>
-			<tr>
-				<td...><span class="postbody">{textString}...</span><span class="gensmall"></span></td>
-			</tr>
-		</table>
-	</td>
-</tr>
+#<tr>
+#	<td...><span class="name"><a name={"#####"}></a><b>{"nameString"}</b></span>...</td> 
+#	<td...>
+#		<table...>
+#			<tr>
+#				<td...><a href="viewtopic.php?p={#####}#{#####}">...<span class="postdetails">"Posted: {DateString}"<span...></span></span></td>
+#				<td...><a href="posting.php?{mode=quote}&p={#####}">...</td>
+#			</tr>
+#			<tr>
+#				<td...>
+#			</tr>
+#			<tr>
+#				<td...><span class="postbody">{textString}...</span><span class="gensmall"></span></td>
+#			</tr>
+#		</table>
+#	</td>
+#</tr>
 
 # validate if true for one page
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import re
+
+
+def getPostData(node, idNode):
+		print(node.name)
+		#postId= idNode
+		#name = node.find(lambda tag: tag.has_attr('name'))
+		#date = node.find('span', class_='postdetails')
+		#body = node.find('span', class_='postbody')
+		#if (name != None and date != None and body != None):
+		#	print(name.next_element.get_text())
+		#	print(date.get_text())
+		#	print('- - - ')
+	# contains a.has_attr('name'), span.class="postdetails", span.class="postbody"
+
+def getPosts():
+	try:
+		# breaking params does not break request
+		html = urlopen('http://www.oldclassiccar.co.uk/forum/phpbb/phpBB2/viewtopic.php?t=12591&postdays=0&postorder=asc&start=0')
+		bs = BeautifulSoup(html, 'lxml')
+	except:
+		print('request exception - check URL')	
+
+	# question for Ben - is it safe to rely on class names? Or should I search for a pattern in the  structure of child nodes?
+	postGroup = bs.find('table', class_='forumline')
+	for node in postGroup:
+		if (node.name != None):
+			idNode = node.find('a', href=re.compile(r'(viewtopic\.php\?p=)\d{5}'))
+			if (idNode != None):
+				getPostData(node, idNode)
+getPosts()
+
 # validate if true for all posts
 
 
