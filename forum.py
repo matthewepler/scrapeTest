@@ -58,21 +58,44 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import re
-
+import datetime
 
 def getPostData(node, idNode):
-		print(node.name)
-		#postId= idNode
-		#name = node.find(lambda tag: tag.has_attr('name'))
-		#date = node.find('span', class_='postdetails')
-		#body = node.find('span', class_='postbody')
-		#if (name != None and date != None and body != None):
-		#	print(name.next_element.get_text())
-		#	print(date.get_text())
-		#	print('- - - ')
-	# contains a.has_attr('name'), span.class="postdetails", span.class="postbody"
+		idTag = node.find(lambda tag: tag.has_attr('name'))
+		if idTag != None:				
+			postId = idTag['name']
+		else:
+			postId = "notFound"	
+
+		# alt method, get id from 'viewtopic...' URL
+		#idStrings = re.compile('p=\d{5}').findall(idNode['href'])
+		#if ( len(idStrings) > 0 ):
+		#	postId = idStrings[0].split('=')[1]
+
+		name = idTag.find_next_sibling().get_text()
+
+		dateString = idNode.find_next_sibling().get_text().split('\xa0')[0]
+		date = dateString.replace('Posted: ', '')
+
+		fullBody = node.find('span', class_='postbody').get_text()
+		if ('_____' in fullBody):
+			body = fullBody.split('____')[0].strip()
+		else:
+			body = fullBody
+
+		postData = {
+			'id'  : postId,
+			'name': name,
+			'date': date,
+			'body': body
+		}
+
+		return postData
+
 
 def getPosts():
+	allPosts = []
+
 	try:
 		# breaking params does not break request
 		html = urlopen('http://www.oldclassiccar.co.uk/forum/phpbb/phpBB2/viewtopic.php?t=12591&postdays=0&postorder=asc&start=0')
@@ -84,12 +107,16 @@ def getPosts():
 	postGroup = bs.find('table', class_='forumline')
 	for node in postGroup:
 		if (node.name != None):
+			# id also appears in a tags with 'name' attribute, but I think the php link is a stronger search criteria. True?
 			idNode = node.find('a', href=re.compile(r'(viewtopic\.php\?p=)\d{5}'))
 			if (idNode != None):
-				getPostData(node, idNode)
+				post = getPostData(node, idNode)
+				allPosts.append(post)
+	print(len(allPosts))
+
+
 getPosts()
 
-# validate if true for all posts
 
 
 
