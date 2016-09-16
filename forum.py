@@ -77,6 +77,8 @@ def getPostData(node, idNode):
 
 
 def getPosts(url, params):
+	global allPosts
+
 	paramString = '?'
 	for p in params:
 		paramString += p + '=' + params[p] + '&'
@@ -96,6 +98,7 @@ def getPosts(url, params):
 		except:
 			print('<table class="forumline"> not found')
 			print(requestUrl)
+			return False;
 
 		for node in postGroup:
 			if (node.name != None):
@@ -107,21 +110,19 @@ def getPosts(url, params):
 
 	except:
 		print('Request Error: ' + requestUrl)	
+		return False
 
-	return len(pagePosts)
+	if len(pagePosts) > 0:
+		allPosts.extend(pagePosts)
+		print( len(pagePosts), 'posts collected')
+		return True
+	else:
+		return False
 
 
-## Extent, navigation
-# - - - - - - - - - -
-# structure of internal page link URL:
-# "...viewtopic.php?" + param list
-# t=[1259] -> topic number
-# postdays=[0] -> default 0 for every link. change this and it breaks
-# postorder=[asc] -> ascending/descending (dsc)
-# start=[0] -> post number
-	# a number greater than existing posts does not return error
- 
-
+# --------------------------------
+#       		MAIN
+# --------------------------------
 topicId = 12591
 startIndex = 0 
 indexPagination = 15
@@ -133,11 +134,22 @@ params = {
 	'start' : str(startIndex)
 }
 
-# ideally, we would get a feedback error from host when the start param returns 0 results, but we don't
-# could check for table row[o] for tag structure, but uncecessary
+allPosts = []
 
-print(getPosts(baseUrl, params) )
+print('requesting posts', startIndex, 'to', startIndex + indexPagination)
 
+while getPosts(baseUrl, params): 
+	startIndex += indexPagination
+	params['start'] = str(startIndex)
+	print('requesting posts', startIndex, 'to', startIndex + indexPagination)
+
+print('** DONE **')
+print( len(allPosts), 'posts collected TOTAL' )
+
+if (len(allPosts) > 0):
+	# output to CSV
+else:
+	print('No posts found.')
 
 
 
