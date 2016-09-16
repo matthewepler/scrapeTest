@@ -16,22 +16,6 @@
 ##
 ##
 
-# Extent, navigation
-# - - - - - - - - - -
-# structure of internal page link URL:
-# "...viewtopic.php?" + param list
-# t=[1259] -> topic number
-# postdays=[0] -> default 0 for every link. change this and it breaks
-# postorder=[asc] -> ascending/descending (dsc)
-# start=[0] -> post number
-	# a number greater than existing posts does not return error
-
-# method 1 = find nav, find <a> with 'Next'
-# method 2 = count # of posts, and use URL' start' param
-	# if return does not equal increment amount(15), we're done
-	# go one more and check for "No posts exist for this topic" text. if yes, great. if not, exit with error
-
-
 # Finding posts
 # - - - - - - - - - -
 # DOM Node structure of post - pertinent details only
@@ -53,7 +37,6 @@
 #	</td>
 #</tr>
 
-# validate if true for one page
 
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
@@ -93,29 +76,67 @@ def getPostData(node, idNode):
 		return postData
 
 
-def getPosts():
-	allPosts = []
+def getPosts(url, params):
+	paramString = '?'
+	for p in params:
+		paramString += p + '=' + params[p] + '&'
+
+	paramString = paramString[:-1]
+	requestUrl = url + paramString
+
+	pagePosts = []
 
 	try:
 		# breaking params does not break request
-		html = urlopen('http://www.oldclassiccar.co.uk/forum/phpbb/phpBB2/viewtopic.php?t=12591&postdays=0&postorder=asc&start=0')
+		html = urlopen(requestUrl)
 		bs = BeautifulSoup(html, 'lxml')
+
+		try:
+			postGroup = bs.find('table', class_='forumline')
+		except:
+			print('<table class="forumline"> not found')
+			print(requestUrl)
+
+		for node in postGroup:
+			if (node.name != None):
+				# id also appears in a tags with 'name' attribute, but I think the php link is a stronger search criteria. True?
+				idNode = node.find('a', href=re.compile(r'(viewtopic\.php\?p=)\d{5}'))
+				if (idNode != None):
+					post = getPostData(node, idNode)
+					pagePosts.append(post)
+
 	except:
-		print('request exception - check URL')	
+		print('Request Error: ' + requestUrl)	
 
-	# question for Ben - is it safe to rely on class names? Or should I search for a pattern in the  structure of child nodes?
-	postGroup = bs.find('table', class_='forumline')
-	for node in postGroup:
-		if (node.name != None):
-			# id also appears in a tags with 'name' attribute, but I think the php link is a stronger search criteria. True?
-			idNode = node.find('a', href=re.compile(r'(viewtopic\.php\?p=)\d{5}'))
-			if (idNode != None):
-				post = getPostData(node, idNode)
-				allPosts.append(post)
-	print(len(allPosts))
+	return len(pagePosts)
 
 
-getPosts()
+## Extent, navigation
+# - - - - - - - - - -
+# structure of internal page link URL:
+# "...viewtopic.php?" + param list
+# t=[1259] -> topic number
+# postdays=[0] -> default 0 for every link. change this and it breaks
+# postorder=[asc] -> ascending/descending (dsc)
+# start=[0] -> post number
+	# a number greater than existing posts does not return error
+ 
+
+topicId = 12591
+startIndex = 0 
+indexPagination = 15
+baseUrl = 'http://www.oldclassiccar.co.uk/forum/phpbb/phpBB2/viewtopic.php' 
+params = {
+	't' : str(topicId),
+	'postdays' : '0',
+	'postorder' : 'asc',
+	'start' : str(startIndex)
+}
+
+# ideally, we would get a feedback error from host when the start param returns 0 results, but we don't
+# could check for table row[o] for tag structure, but uncecessary
+
+print(getPosts(baseUrl, params) )
 
 
 
