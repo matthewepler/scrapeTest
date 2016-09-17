@@ -73,30 +73,7 @@ def getPostData(node, idNode):
 		dateString = idNode.find_next_sibling().get_text().split('\xa0')[0]
 		date = dateString.replace('Posted: ', '')
 
-		fullBody = node.find('span', class_='postbody')
-		bodyText = fullBody.get_text().strip()
-
-		if len(bodyText) < 1: 
-			while fullBody != None:
-				try:
-					fullBody = fullBody.find_next('span', class_='postbody')
-					bodyText = fullBody.get_text().strip()	
-				except: 
-					print('Error: could not retrieve post body (', postId, ')')
-
-				if len(bodyText) > 0:
-					if ('_________________' in fullBody):
-						body = bodyText.split('_________________')[0].strip()
-						break;
-					else:
-						body = bodyText
-						break;
-
-		else:
-			if ('_________________' in bodyText):
-				body = bodyText.split('_________________')[0].strip()
-			else:
-				body = bodyText
+		body = parseBody(node.find('span', class_='postbody'))
 
 		postData = {
 			'id'  : postId,
@@ -106,6 +83,20 @@ def getPostData(node, idNode):
 		}
 
 		return postData
+
+
+def parseBody(node):
+	bodyText = node.get_text().strip()
+
+	if len(bodyText) < 1:
+			return parseBody( node.find_next('span', class_='postbody') )
+
+	if ('_________________' in bodyText):
+		body = bodyText.split('_________________')[0].strip()
+	else:
+		body = bodyText
+	
+	return body.replace('\n', '').replace('\r', '')
 
 
 def getPosts(url, params):
@@ -129,6 +120,7 @@ def getPosts(url, params):
 			postGroup = bs.find('table', class_='forumline')
 		except:
 			print('<table class="forumline"> not found')
+
 			print(requestUrl)
 			return False;
 
