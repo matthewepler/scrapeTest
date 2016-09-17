@@ -42,6 +42,19 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import re
 import datetime
+import csv
+
+def writeToCSV(posts):
+	with open('posts.csv', 'w') as csvfile:
+		fieldnames = ['id', 'name', 'date', 'body']
+		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+		
+		writer.writeheader()
+		for p in posts:
+			writer.writerow(p)
+
+		print('file write complete')
+
 
 def getPostData(node, idNode):
 		idTag = node.find(lambda tag: tag.has_attr('name'))
@@ -60,11 +73,30 @@ def getPostData(node, idNode):
 		dateString = idNode.find_next_sibling().get_text().split('\xa0')[0]
 		date = dateString.replace('Posted: ', '')
 
-		fullBody = node.find('span', class_='postbody').get_text()
-		if ('_____' in fullBody):
-			body = fullBody.split('____')[0].strip()
+		fullBody = node.find('span', class_='postbody')
+		bodyText = fullBody.get_text().strip()
+
+		if len(bodyText) < 1: 
+			while fullBody != None:
+				try:
+					fullBody = fullBody.find_next('span', class_='postbody')
+					bodyText = fullBody.get_text().strip()	
+				except: 
+					print('Error: could not retrieve post body (', postId, ')')
+
+				if len(bodyText) > 0:
+					if ('_____' in fullBody):
+						body = bodyText.split('____')[0].strip()
+						break;
+					else:
+						body = bodyText
+						break;
+
 		else:
-			body = fullBody
+			if ('_____' in fullBody):
+				body = bodyText.split('____')[0].strip()
+			else:
+				body = bodyText
 
 		postData = {
 			'id'  : postId,
@@ -147,7 +179,7 @@ print('** DONE **')
 print( len(allPosts), 'posts collected TOTAL' )
 
 if (len(allPosts) > 0):
-	# output to CSV
+	writeToCSV(allPosts)	
 else:
 	print('No posts found.')
 
