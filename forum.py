@@ -85,16 +85,16 @@ def getPostData(node, idNode):
 					print('Error: could not retrieve post body (', postId, ')')
 
 				if len(bodyText) > 0:
-					if ('_____' in fullBody):
-						body = bodyText.split('____')[0].strip()
+					if ('_________________' in fullBody):
+						body = bodyText.split('_________________')[0].strip()
 						break;
 					else:
 						body = bodyText
 						break;
 
 		else:
-			if ('_____' in fullBody):
-				body = bodyText.split('____')[0].strip()
+			if ('_________________' in bodyText):
+				body = bodyText.split('_________________')[0].strip()
 			else:
 				body = bodyText
 
