@@ -1,22 +1,13 @@
 """
-Web Scraping Code Test
+Forum Scraper
 
-Assignment:
-Write a scraper using Python 3 (ideally, or 2.7 optionally),
-Pycurl or the python requests library, and BeautifulSoup (bs4)
-to be used to collect all posts from all the pages of this thread
-in this forum:
-
+Scrapes a URL for posts:
 http://www.oldclassiccar.co.uk/forum/phpbb/phpBB2/viewtopic.php?t=12591
 
-Required fields are: post id, name, date of the post (in text form or as is)
-and post body.
-
-Output the results to a spreadsheet file named forum.csv
-
-Author: Matthew Epler, 2016
+Author: Matthew Epler
+Created: September 17, 2016
+Updated: December 27, 2016
 """
-
 
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
@@ -114,9 +105,6 @@ def getPosts(url, params):
         return False
 
 
-# --------------------------------
-#       		MAIN
-# --------------------------------
 topicId = 12591
 startIndex = 0
 indexPagination = 15
