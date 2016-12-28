@@ -21,7 +21,19 @@ params = {
 def main():
     """Initializes and runs scraping tasks for a specific website"""
     c = Controller(baseURL, params)
+    c.create_collection('posts')
+    
+    # define what kinds of elements you want to target
+    # ?? should Scraper be a class within Controller?
 
 
 if __name__ == '__main__':
     main()
+
+
+# create a controller - holds url and params
+# create scrapers for every kind of target I want on that page
+# define cleaner method(s) for each scraper -> designate type and destination
+# define printer class to show what is in each collection
+# write collections to CSV
+
